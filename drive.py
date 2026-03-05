@@ -51,7 +51,7 @@ def upload_srt(folder_id: str, filename: str, content: bytes) -> str:
     service = auth.build_drive_service()
     media = MediaInMemoryUpload(
         content,
-        mimetype="application/x-subrip",
+        mimetype="text/plain",
         resumable=False,
     )
     file_meta = {"name": filename, "parents": [folder_id]}

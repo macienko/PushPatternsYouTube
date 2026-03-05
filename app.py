@@ -87,7 +87,7 @@ def check_captions():
         db.set_state(drive_file_id, "captions_downloading", caption_id=caption_id)
         try:
             srt_bytes = youtube.download_caption_srt(caption_id)
-            srt_filename = os.path.splitext(filename)[0] + ".srt"
+            srt_filename = os.path.splitext(filename)[0] + ".txt"
             drive.upload_srt(config.CAPTIONS_DRIVE_FOLDER_ID, srt_filename, srt_bytes)
             db.set_state(drive_file_id, "done")
             log.info("check_captions: '%s' saved to Drive captions folder", srt_filename)
