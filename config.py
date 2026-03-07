@@ -11,7 +11,7 @@ SOURCE_DRIVE_FOLDER_ID          = os.environ["SOURCE_DRIVE_FOLDER_ID"]
 CAPTIONS_DRIVE_FOLDER_ID        = os.environ["CAPTIONS_DRIVE_FOLDER_ID"]
 COMMUNITY_POSTS_DRIVE_FOLDER_ID = os.getenv("COMMUNITY_POSTS_DRIVE_FOLDER_ID")
 
-OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 OPENAI_PROMPT  = os.getenv(
     "OPENAI_PROMPT",
     "Create a captivating and engaging community post that teases our upcoming video without "

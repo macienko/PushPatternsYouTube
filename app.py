@@ -92,7 +92,7 @@ def check_captions():
             drive.upload_srt(config.CAPTIONS_DRIVE_FOLDER_ID, srt_filename, srt_bytes)
             log.info("check_captions: '%s' saved to Drive captions folder", srt_filename)
 
-            if config.COMMUNITY_POSTS_DRIVE_FOLDER_ID:
+            if config.COMMUNITY_POSTS_DRIVE_FOLDER_ID and config.OPENAI_API_KEY:
                 log.info("check_captions: generating community post for '%s'", filename)
                 post_text = gpt.generate_community_post(srt_bytes.decode("utf-8"))
                 post_filename = os.path.splitext(filename)[0] + "_community_post.txt"
