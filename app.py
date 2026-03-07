@@ -92,11 +92,12 @@ def check_captions():
             drive.upload_srt(config.CAPTIONS_DRIVE_FOLDER_ID, srt_filename, srt_bytes)
             log.info("check_captions: '%s' saved to Drive captions folder", srt_filename)
 
-            log.info("check_captions: generating community post for '%s'", filename)
-            post_text = gpt.generate_community_post(srt_bytes.decode("utf-8"))
-            post_filename = os.path.splitext(filename)[0] + "_community_post.txt"
-            drive.upload_srt(config.COMMUNITY_POSTS_DRIVE_FOLDER_ID, post_filename, post_text.encode("utf-8"))
-            log.info("check_captions: community post '%s' saved to Drive", post_filename)
+            if config.COMMUNITY_POSTS_DRIVE_FOLDER_ID:
+                log.info("check_captions: generating community post for '%s'", filename)
+                post_text = gpt.generate_community_post(srt_bytes.decode("utf-8"))
+                post_filename = os.path.splitext(filename)[0] + "_community_post.txt"
+                drive.upload_srt(config.COMMUNITY_POSTS_DRIVE_FOLDER_ID, post_filename, post_text.encode("utf-8"))
+                log.info("check_captions: community post '%s' saved to Drive", post_filename)
 
             db.set_state(drive_file_id, "done")
         except Exception as exc:
