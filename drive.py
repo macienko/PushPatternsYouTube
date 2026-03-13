@@ -44,9 +44,9 @@ def download_video(file_id: str) -> tuple[bytes, str]:
 
 
 def read_text_file(file_id: str) -> str:
-    """Download a plain-text Drive file by ID and return its content."""
+    """Export a Google Doc (or plain-text Drive file) by ID and return its content."""
     service = auth.build_drive_service()
-    request = service.files().get_media(fileId=file_id)
+    request = service.files().export_media(fileId=file_id, mimeType="text/plain")
     buf = io.BytesIO()
     downloader = MediaIoBaseDownload(buf, request)
     done = False
