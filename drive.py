@@ -43,6 +43,18 @@ def download_video(file_id: str) -> tuple[bytes, str]:
     return buf.getvalue(), mime_type
 
 
+def read_text_file(file_id: str) -> str:
+    """Download a plain-text Drive file by ID and return its content."""
+    service = auth.build_drive_service()
+    request = service.files().get_media(fileId=file_id)
+    buf = io.BytesIO()
+    downloader = MediaIoBaseDownload(buf, request)
+    done = False
+    while not done:
+        _, done = downloader.next_chunk()
+    return buf.getvalue().decode("utf-8")
+
+
 def upload_srt(folder_id: str, filename: str, content: bytes) -> str:
     """Upload an SRT file to a Drive folder.
 

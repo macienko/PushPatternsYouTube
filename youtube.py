@@ -1,6 +1,8 @@
 from typing import Optional
 
 import auth
+import config
+import drive
 from googleapiclient.http import MediaInMemoryUpload
 
 
@@ -11,10 +13,20 @@ def upload_video(title: str, video_bytes: bytes, mime_type: str) -> str:
     """
     service = auth.build_youtube_service()
 
+    description = ""
+    if config.DESCRIPTION_DRIVE_FILE_ID:
+        description = drive.read_text_file(config.DESCRIPTION_DRIVE_FILE_ID)
+
+    tags = []
+    if config.TAGS_DRIVE_FILE_ID:
+        raw = drive.read_text_file(config.TAGS_DRIVE_FILE_ID)
+        tags = [t.strip() for t in raw.split(",") if t.strip()]
+
     body = {
         "snippet": {
             "title": title,
-            "description": "",
+            "description": description,
+            "tags": tags,
         },
         "status": {
             "privacyStatus": "private",
