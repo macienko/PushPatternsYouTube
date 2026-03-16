@@ -15,6 +15,10 @@ CREATE TABLE IF NOT EXISTS videos (
     discovered_at    TIMESTAMPTZ DEFAULT NOW(),
     updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
 """
 
 
@@ -103,6 +107,24 @@ def get_state_counts() -> dict:
         with conn.cursor() as cur:
             cur.execute("SELECT state, COUNT(*) FROM videos GROUP BY state")
             return {row[0]: row[1] for row in cur.fetchall()}
+
+
+def get_setting(key: str) -> str | None:
+    with _conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT value FROM settings WHERE key = %s", (key,))
+            row = cur.fetchone()
+            return row[0] if row else None
+
+
+def set_setting(key: str, value: str):
+    with _conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "INSERT INTO settings (key, value) VALUES (%s, %s) "
+                "ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value",
+                (key, value),
+            )
 
 
 def recover_stuck_uploading():

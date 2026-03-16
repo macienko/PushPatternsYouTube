@@ -1,6 +1,12 @@
 import config
+import db
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
+
+
+def _get_refresh_token() -> str:
+    """Return refresh token from DB if set, otherwise fall back to env var."""
+    return db.get_setting("google_refresh_token") or config.GOOGLE_REFRESH_TOKEN
 
 
 def get_credentials() -> Credentials:
@@ -12,7 +18,7 @@ def get_credentials() -> Credentials:
     """
     return Credentials(
         token=None,
-        refresh_token=config.GOOGLE_REFRESH_TOKEN,
+        refresh_token=_get_refresh_token(),
         token_uri="https://oauth2.googleapis.com/token",
         client_id=config.GOOGLE_CLIENT_ID,
         client_secret=config.GOOGLE_CLIENT_SECRET,

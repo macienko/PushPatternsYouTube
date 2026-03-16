@@ -3,7 +3,8 @@ import os
 from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, request, session
+from google_auth_oauthlib.flow import Flow
 
 import config
 import db
@@ -18,6 +19,22 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.secret_key = config.FLASK_SECRET_KEY
+
+_OAUTH_SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/youtube",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
+
+_OAUTH_CLIENT_CONFIG = {
+    "web": {
+        "client_id": config.GOOGLE_CLIENT_ID,
+        "client_secret": config.GOOGLE_CLIENT_SECRET,
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+    }
+}
 
 
 # ---------------------------------------------------------------------------
@@ -108,6 +125,33 @@ def check_captions():
 # ---------------------------------------------------------------------------
 # Flask routes
 # ---------------------------------------------------------------------------
+
+@app.route("/auth")
+def auth_start():
+    if not config.AUTH_SECRET or request.args.get("secret") != config.AUTH_SECRET:
+        return "Forbidden", 403
+    flow = Flow.from_client_config(
+        _OAUTH_CLIENT_CONFIG,
+        scopes=_OAUTH_SCOPES,
+        redirect_uri=config.OAUTH_REDIRECT_URI,
+    )
+    auth_url, state = flow.authorization_url(access_type="offline", prompt="consent")
+    session["oauth_state"] = state
+    return redirect(auth_url)
+
+
+@app.route("/auth/callback")
+def auth_callback():
+    flow = Flow.from_client_config(
+        _OAUTH_CLIENT_CONFIG,
+        scopes=_OAUTH_SCOPES,
+        redirect_uri=config.OAUTH_REDIRECT_URI,
+    )
+    flow.fetch_token(code=request.args.get("code"))
+    db.set_setting("google_refresh_token", flow.credentials.refresh_token)
+    log.info("auth_callback: new refresh token saved to DB")
+    return "Authentication successful. The automation is now using the new token.", 200
+
 
 @app.route("/health")
 def health():
